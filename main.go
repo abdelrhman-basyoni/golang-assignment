@@ -22,16 +22,7 @@ func main() {
 	e := echo.New()
 
 	// Middleware
-
-	// Register the global error handler middleware
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			if err := next(c); err != nil {
-				middlewares.GlobalErrorHandler(err, c)
-			}
-			return nil
-		}
-	})
+	e.HTTPErrorHandler = middlewares.GlobalErrorHandler
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
