@@ -2,7 +2,6 @@ package Module_Book
 
 import (
 	"database/sql"
-	"encoding/json"
 	"net/http"
 
 	domain_entities "github.com/abdelrhman-basyoni/golang-assignment/core/domain/entities"
@@ -70,19 +69,26 @@ func (bc *BookController) HandleGetById(c echo.Context) error {
 
 func (bc *BookController) HandleUpdate(c echo.Context) error {
 	id := c.Param("id")
-	var update map[string]interface{}
 
-	// Read the request body and check if it's valid JSON
-	if err := json.NewDecoder(c.Request().Body).Decode(&update); err != nil {
+	var book domain_entities.Book
+
+	// Bind and validate the request body
+	if err := c.Bind(&book); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message": "Invalid request body: " + err.Error(),
+			"message": "Invalid request body",
 		})
 	}
 
-	err := bc.uc.Update(id, update)
+	// use the validator library to validate required fields
+	if err := validate.Struct(&book); err != nil {
+
+		return err
+	}
+
+	err := bc.uc.Update(id, book)
 
 	if err != nil {
-		return err
+		return c.NoContent(http.StatusNotFound)
 
 	}
 	return c.NoContent(http.StatusOK)

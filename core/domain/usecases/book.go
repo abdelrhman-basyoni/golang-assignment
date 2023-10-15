@@ -32,7 +32,7 @@ func (buc *BookUseCases) GetByID(id string) (*domain_entities.Book, error) {
 	return buc.bookRepo.GetByID(id)
 }
 
-func (buc *BookUseCases) Update(id string, update map[string]interface{}) error {
+func (buc *BookUseCases) Update(id string, update domain_entities.Book) error {
 	return buc.bookRepo.Update(id, update)
 }
 

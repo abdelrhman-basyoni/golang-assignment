@@ -2,9 +2,7 @@ package imp_repo
 
 import (
 	"database/sql"
-	"fmt"
 	"strconv"
-	"strings"
 
 	domain_entities "github.com/abdelrhman-basyoni/golang-assignment/core/domain/entities"
 )
@@ -61,10 +59,10 @@ func (b *BookRepoSql) GetAll() []domain_entities.Book {
 		var book domain_entities.Book
 
 		if err := rows.Scan(&idInt, &book.Name, &book.Genre, &book.Price); err != nil {
-			fmt.Println(err)
+
 			return books
 		}
-		fmt.Println(book)
+
 		book.ID = strconv.Itoa(idInt)
 		books = append(books, book)
 	}
@@ -91,36 +89,23 @@ func (b *BookRepoSql) GetByID(id string) (*domain_entities.Book, error) {
 
 }
 
-func (b *BookRepoSql) Update(id string, update map[string]interface{}) error {
-
-	var placeholders []string
-	var values []interface{}
-	index := 1
-	for key, value := range update {
-		placeholders = append(placeholders, fmt.Sprintf("%s = $%d", key, index))
-		values = append(values, value)
-		index++
-	}
-	// Combine placeholders into a comma-separated string
-	setClause := strings.Join(placeholders, ", ")
+func (b *BookRepoSql) Update(id string, update domain_entities.Book) error {
 
 	// Define the SQL update statement
-	updateSQL := fmt.Sprintf(`
+	updateSQL := `
 		UPDATE books
-		SET %s
-		WHERE id = $%d
-	`, setClause, index)
+		SET name = ?, genre = ?, price = ?
+		WHERE id = ?
+	`
 
-	values = append(values, id)
-
-	_, err := b.db.Exec(updateSQL, values...)
+	_, err := b.db.Exec(updateSQL, update.Name, update.Genre, update.Price, id)
 
 	return err
 }
 
 func (b *BookRepoSql) Delete(id string) error {
 
-	deleteStatement := `DELETE books where id = %1`
+	deleteStatement := `DELETE from books where id = ?`
 
 	_, err := b.db.Exec(deleteStatement, id)
 
